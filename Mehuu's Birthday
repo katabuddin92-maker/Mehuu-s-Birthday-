@@ -1,0 +1,172 @@
+from pathlib import Path
+import base64, html, zipfile, os, textwrap
+
+# Uploaded photos supplied in the conversation
+photo_paths = [
+    "/mnt/data/7324.png",
+    "/mnt/data/7323.jpg",
+    "/mnt/data/7321.jpg",
+    "/mnt/data/7320.jpg",
+    "/mnt/data/7319.jpg",
+    "/mnt/data/7318.jpg",
+    "/mnt/data/7317.jpg",
+    "/mnt/data/7316.jpg",
+]
+
+def data_uri(path):
+    p = Path(path)
+    mime = "image/png" if p.suffix.lower() == ".png" else "image/jpeg"
+    return f"data:{mime};base64," + base64.b64encode(p.read_bytes()).decode()
+
+imgs = [data_uri(p) for p in photo_paths]
+
+# Keep the experience similar in structure to the reference video, but make the design/content original.
+img_js = "[" + ",".join('"' + s + '"' for s in imgs) + "]"
+
+page = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>For Mehuuu ♡</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Georgia,"Times New Roman",serif}
+body{background:radial-gradient(circle at 50% 10%,#4a1230 0,#220b1c 45%,#0e0710 100%);color:#fff;overflow-x:hidden}
+#hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.heart{position:absolute;bottom:-30px;font-size:16px;opacity:.65;animation:float linear infinite}
+@keyframes float{from{transform:translateY(0) rotate(0);opacity:0}15%{opacity:.7}to{transform:translateY(-110vh) rotate(35deg);opacity:0}}
+.wrap{position:relative;z-index:1;max-width:620px;margin:auto;min-height:100vh;padding:28px 18px 50px}
+.screen{display:none;min-height:calc(100vh - 78px);align-items:center;justify-content:center;text-align:center}
+.screen.active{display:flex;flex-direction:column}
+.card{width:100%;background:rgba(40,10,30,.72);border:1px solid rgba(255,190,220,.35);box-shadow:0 20px 70px rgba(0,0,0,.4);border-radius:28px;padding:30px 22px;backdrop-filter:blur(8px)}
+.small{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#ffc6df}
+h1{font-size:clamp(34px,9vw,62px);margin:10px 0 8px;line-height:1.02}
+h2{font-size:clamp(27px,7vw,42px);margin:8px 0 12px}
+p{line-height:1.65;color:#f5dce9}
+.btn{border:1px solid #e9a2c5;background:#3a102b;color:#fff;border-radius:999px;padding:12px 23px;font-size:16px;cursor:pointer;margin-top:14px;transition:.2s}
+.btn:hover{transform:translateY(-2px);background:#54163f}
+input{width:160px;text-align:center;background:#160b14;border:1px solid #d68caf;color:#fff;border-radius:14px;padding:13px;font-size:22px;letter-spacing:7px;margin:15px auto 3px;outline:none}
+.err{height:20px;color:#ff9dbf;font-size:13px}
+.photo{width:min(88vw,390px);max-height:48vh;object-fit:cover;border-radius:18px;border:6px solid #fff;box-shadow:0 14px 45px rgba(0,0,0,.45);margin:14px auto}
+.polaroid{background:#fff;padding:10px 10px 26px;width:min(76vw,300px);transform:rotate(-2deg);box-shadow:0 18px 50px rgba(0,0,0,.45);margin:16px auto;color:#5a263f}
+.polaroid img{width:100%;aspect-ratio:4/5;object-fit:cover}.caption{font-family:cursive;font-size:18px;margin-top:8px}
+.mem-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+.mem{background:#fff;padding:7px 7px 20px;color:#5a263f;box-shadow:0 8px 25px rgba(0,0,0,.3);transform:rotate(var(--r));cursor:pointer}
+.mem img{width:100%;aspect-ratio:1/1.15;object-fit:cover}.mem span{display:block;font-family:cursive;margin-top:5px}
+.balloons{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin:25px 0}
+.balloon{width:74px;height:96px;border-radius:50% 50% 48% 48%;position:relative;cursor:pointer;box-shadow:inset -9px -10px 20px rgba(0,0,0,.18);animation:bob 2s ease-in-out infinite alternate}
+.balloon:after{content:"";position:absolute;left:50%;top:94px;width:1px;height:45px;background:#ddd}
+.balloon span{position:absolute;inset:0;display:grid;place-items:center;font-size:24px}
+@keyframes bob{to{transform:translateY(-9px)}}
+.final{font-size:18px;white-space:pre-line;text-align:left;background:rgba(255,255,255,.07);padding:20px;border-radius:20px;border:1px solid rgba(255,255,255,.15)}
+.progress{font-size:12px;color:#d9a6bd;margin-bottom:14px}
+.burst{position:fixed;pointer-events:none;font-size:22px;z-index:9;animation:burst 900ms ease-out forwards}
+@keyframes burst{to{transform:translate(var(--x),var(--y)) rotate(360deg);opacity:0}}
+.footer{font-size:12px;color:#b88ca4;margin-top:18px}
+</style>
+</head>
+<body>
+<div id="hearts"></div>
+<div class="wrap">
+
+<section class="screen active" id="s0">
+ <div class="card">
+  <div class="small">A tiny birthday surprise</div>
+  <h1>For Mehuuu ♡</h1>
+  <p>There is a little something waiting for you.<br>But first… unlock it ✨</p>
+  <input id="pin" inputmode="numeric" maxlength="4" placeholder="••••" aria-label="4 digit code">
+  <div class="err" id="err"></div>
+  <button class="btn" onclick="unlock()">Unlock the surprise 🔐</button>
+  <div class="footer">Hint: your special day — DDMM</div>
+ </div>
+</section>
+
+<section class="screen" id="s1">
+ <div class="card">
+  <div class="small">It worked ✨</div>
+  <h2>Happy Birthday,<br>Mehuuu! 🎂</h2>
+  <p>Today is all about celebrating the wonderful person you are.</p>
+  <img class="photo" id="hero">
+  <button class="btn" onclick="go(2)">There's something special… →</button>
+ </div>
+</section>
+
+<section class="screen" id="s2">
+ <div class="card">
+  <div class="small">A little message</div>
+  <h2>One more year,<br>one more chapter 💗</h2>
+  <p>May this new year of your life bring you peaceful days, genuine smiles, beautiful memories and lots of reasons to be happy.</p>
+  <p><i>Keep being the lovely, kind and unforgettable Mehuuu you are.</i></p>
+  <button class="btn" onclick="go(3)">Open the memories →</button>
+ </div>
+</section>
+
+<section class="screen" id="s3">
+ <div class="card">
+  <div class="small">Cute memories 📸</div>
+  <h2>Little moments, big smiles</h2>
+  <div class="mem-grid" id="gallery"></div>
+  <button class="btn" onclick="go(4)">Next surprise →</button>
+ </div>
+</section>
+
+<section class="screen" id="s4">
+ <div class="card">
+  <div class="small">Make a wish 🎈</div>
+  <h2>Pop the wishes</h2>
+  <p>Tap every balloon and make a little birthday wish.</p>
+  <div class="balloons" id="balloons"></div>
+  <div id="wishMsg" class="small">0 / 5 popped</div>
+  <button class="btn" id="wishNext" style="display:none" onclick="go(5)">One last surprise →</button>
+ </div>
+</section>
+
+<section class="screen" id="s5">
+ <div class="card">
+  <div class="small">One last surprise 💌</div>
+  <h2>For you, Mehuuu</h2>
+  <div class="polaroid">
+   <img id="lastpic">
+   <div class="caption">A memory worth keeping ♡</div>
+  </div>
+  <div class="final">Happy Birthday, Mehuuu! 🎂
+
+I hope you always have people around you who make you laugh, days that feel peaceful, and dreams that slowly become real.
+
+Thank you for all the little moments and memories. I hope this birthday becomes another happy page in your story.
+
+Stay happy, stay safe, keep smiling — and have the most beautiful birthday. ✨
+
+— From someone wishing the very best for you ♡</div>
+  <button class="btn" onclick="celebrate()">Celebrate! 🎉</button>
+  <div class="footer">28 October 2007 • Birthday memories</div>
+ </div>
+</section>
+
+</div>
+<script>
+const photos = __PHOTOS__;
+const screens=[...document.querySelectorAll('.screen')];
+function go(n){screens.forEach((x,i)=>x.classList.toggle('active',i===n));window.scrollTo({top:0,behavior:'smooth'});if(n===3)makeGallery();if(n===4)makeBalloons();}
+function unlock(){const v=document.getElementById('pin').value;if(v==='2810'){document.getElementById('err').textContent='';document.getElementById('hero').src=photos[1];go(1);chime();}else document.getElementById('err').textContent='Not quite — try the DDMM birthday hint.'}
+document.getElementById('pin').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+function makeGallery(){const g=document.getElementById('gallery');if(g.children.length)return;photos.slice(0,7).forEach((p,i)=>{const d=document.createElement('div');d.className='mem';d.style.setProperty('--r',(i%2?'2deg':'-2deg'));d.innerHTML='<img src="'+p+'"><span>'+['Little Mehuuu','A beautiful day','A happy memory','Just us','Another smile','Sweet moments','Always memorable'][i]+'</span>';g.appendChild(d);});}
+let popped=0;
+function makeBalloons(){if(document.getElementById('balloons').children.length)return;const b=document.getElementById('balloons');for(let i=0;i<5;i++){const d=document.createElement('div');d.className='balloon';d.style.background=['#ef6f9e','#f7b2cf','#c58bdc','#f28bb4','#e7a0bf'][i];d.innerHTML='<span>♡</span>';d.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;d.style.transform='scale(.1)';d.style.opacity='0';burst(d);popped++;document.getElementById('wishMsg').textContent=popped+' / 5 popped';if(popped===5){document.getElementById('wishNext').style.display='inline-block';document.getElementById('wishMsg').textContent='All wishes sent into the universe ✨';chime();}};b.appendChild(d);}}
+function burst(el){const r=el.getBoundingClientRect();for(let i=0;i<10;i++){const s=document.createElement('div');s.className='burst';s.textContent=['♥','✦','♡','✨'][i%4];s.style.left=r.left+r.width/2+'px';s.style.top=r.top+r.height/2+'px';s.style.setProperty('--x',(Math.random()*180-90)+'px');s.style.setProperty('--y',(Math.random()*180-90)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),950);}}
+function celebrate(){for(let i=0;i<45;i++){setTimeout(()=>{const s=document.createElement('div');s.className='burst';s.textContent=['🎉','💗','✨','🎈','♡'][i%5];s.style.left=Math.random()*100+'vw';s.style.top='50vh';s.style.setProperty('--x',(Math.random()*240-120)+'px');s.style.setProperty('--y',(Math.random()*-380-40)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),1000)},i*25)}chime();}
+function chime(){try{const A=new AudioContext(),o=A.createOscillator(),g=A.createGain();o.frequency.value=660;g.gain.value=.04;o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+.18);}catch(e){}}
+function hearts(){const h=document.getElementById('hearts');for(let i=0;i<26;i++){const x=document.createElement('div');x.className='heart';x.textContent=['♥','♡','✦'][i%3];x.style.left=Math.random()*100+'%';x.style.animationDuration=(7+Math.random()*8)+'s';x.style.animationDelay=(-Math.random()*12)+'s';x.style.fontSize=(10+Math.random()*14)+'px';h.appendChild(x)}}hearts();
+document.getElementById('lastpic').src=photos[0];
+</script>
+</body>
+</html>'''.replace("__PHOTOS__", img_js)
+
+out = Path("/mnt/data/Mehuuu_Birthday_Surprise.html")
+out.write_text(page, encoding="utf-8")
+
+zip_path = Path("/mnt/data/Mehuuu_Birthday_Surprise.zip")
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    z.write(out, arcname="index.html")
+
+print(f"Created:\n- {out}\n- {zip_path}\n\nPassword to open the surprise: 2810")
