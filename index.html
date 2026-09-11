@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Mehuuu 💗</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Georgia,serif;
+  background:linear-gradient(135deg,#160b18,#3b142d,#160b18);
+  color:white;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+.screen{
+  min-height:100vh;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:25px;
+}
+
+.screen.active{
+  display:flex;
+}
+
+.box{
+  width:100%;
+  max-width:430px;
+  padding:35px 25px;
+  border-radius:28px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 15px 50px rgba(0,0,0,.4);
+  backdrop-filter:blur(12px);
+}
+
+h1{
+  font-size:42px;
+  margin-bottom:15px;
+}
+
+h2{
+  font-size:30px;
+  margin-bottom:15px;
+}
+
+p{
+  font-size:18px;
+  line-height:1.6;
+  opacity:.9;
+}
+
+.heart{
+  font-size:70px;
+  animation:beat 1.2s infinite;
+  margin-bottom:15px;
+}
+
+@keyframes beat{
+  50%{transform:scale(1.18)}
+}
+
+input{
+  width:100%;
+  padding:15px;
+  margin-top:22px;
+  border:none;
+  outline:none;
+  border-radius:14px;
+  text-align:center;
+  font-size:18px;
+  background:white;
+  color:#333;
+}
+
+button{
+  margin-top:15px;
+  padding:14px 28px;
+  border:0;
+  border-radius:30px;
+  background:#ff6fae;
+  color:white;
+  font-size:17px;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.96);
+}
+
+.error{
+  color:#ff9dbf;
+  margin-top:12px;
+  display:none;
+}
+
+.loader{
+  width:65px;
+  height:65px;
+  border:5px solid rgba(255,255,255,.2);
+  border-top:5px solid #ff75ad;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:25px auto;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.big{
+  font-size:55px;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:25px;
+}
+
+.gallery img{
+  width:100%;
+  height:190px;
+  object-fit:cover;
+  border-radius:18px;
+  border:2px solid rgba(255,255,255,.2);
+}
+
+.message{
+  margin-top:25px;
+  text-align:left;
+  background:rgba(255,255,255,.07);
+  padding:20px;
+  border-radius:20px;
+}
+
+#confetti{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.confetti{
+  position:absolute;
+  top:-20px;
+  font-size:22px;
+  animation:fall 4s linear forwards;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(720deg);
+  }
+}
+
+.small{
+  font-size:14px;
+  opacity:.65;
+  margin-top:18px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PASSWORD SCREEN -->
+<section id="login" class="screen active">
+  <div class="box">
+    <div class="heart">💗</div>
+    <h1>Hey Mehuuu!</h1>
+    <p>This little surprise is only for you 🎁</p>
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter the secret password"
+    >
+
+    <button onclick="unlock()">Open My Surprise ✨</button>
+
+    <div id="error" class="error">
+      Wrong password 😶 Try again!
+    </div>
+
+    <div class="small">A little birthday surprise 💕</div>
+  </div>
+</section>
+
+
+<!-- LOADING -->
+<section id="loading" class="screen">
+  <div class="box">
+    <div class="big">🎁</div>
+    <h2>Wait a little...</h2>
+    <p>Preparing something special for Mehuuu 💗</p>
+    <div class="loader"></div>
+  </div>
+</section>
+
+
+<!-- BIRTHDAY -->
+<section id="birthday" class="screen">
+  <div class="box">
+
+    <div class="heart">🎂</div>
+
+    <h1>Happy Birthday</h1>
+
+    <h2>Mehuuu 💗</h2>
+
+    <p>
+      28 October 🎈
+    </p>
+
+    <p style="margin-top:15px">
+      Today is a special day because<br>
+      someone very special was born. ✨
+    </p>
+    
+    <div class="gallery">
+      <img src="photo1.jpg" alt="Mehuuu">
+    </div>
+    <button onclick="showMemories()">
+      Continue 💕
+    </button>
+
+  </div>
+  
+</section>
+
+
+<!-- MEMORIES -->
+<section id="memories" class="screen">
+  <div class="box">
+
+    <h2>Our Little Memories 📸</h2>
+
+    <p>
+      Some moments are too precious<br>
+      to be forgotten. 💗
+    </p>
+
+    <button onclick="showMessage()">
+      One Last Thing 💌
+    </button>
+
+  </div>
+</section>
+
+
+<!-- FINAL MESSAGE -->
+<section id="final" class="screen">
+  <div class="box">
+
+    <div class="heart">💖</div>
+
+    <h2>For You, Mehuuu</h2>
+
+    <div class="message">
+
+      <p>
+        Happy Birthday, Mehuuu! 🎂💗
+        <br><br>
+
+        I hope your special day is filled with
+        happiness, beautiful moments and
+        lots of reasons to smile.
+        <br><br>
+
+        May all your dreams come true,
+        and may every new year of your life
+        bring you something beautiful. ✨
+        <br><br>
+
+        Stay happy, stay safe and keep smiling. 🌸
+        <br><br>
+
+        Once again...
+        <br>
+        <b>Happy Birthday Mehuuu! 🎂💗</b>
+      </p>
+
+    </div>
+
+    <p style="margin-top:25px">
+      Made with lots of memories 💕
+    </p>
+
+  </div>
+</section>
+
+
+<div id="confetti"></div>
+
+
+<script>
+
+function changeScreen(id){
+
+  document.querySelectorAll(".screen")
+    .forEach(s => s.classList.remove("active"));
+
+  document.getElementById(id)
+    .classList.add("active");
+}
+
+
+function unlock(){
+
+  const pass =
+    document.getElementById("password").value;
+
+  if(pass === "31226"){
+
+    document.getElementById("error")
+      .style.display="none";
+
+    changeScreen("loading");
+
+    setTimeout(function(){
+      changeScreen("birthday");
+      makeConfetti();
+    },2500);
+
+  }else{
+
+    document.getElementById("error")
+      .style.display="block";
+
+  }
+}
+
+
+function showMemories(){
+  changeScreen("memories");
+}
+
+
+function showMessage(){
+  changeScreen("final");
+  makeConfetti();
+}
+
+
+document.getElementById("password")
+.addEventListener("keydown",function(e){
+
+  if(e.key==="Enter"){
+    unlock();
+  }
+
+});
+
+
+function makeConfetti(){
+
+  const container =
+    document.getElementById("confetti");
+
+  const items=["💗","💕","💖","✨","🎉","🌸","🎈"];
+
+  for(let i=0;i<35;i++){
+
+    const c=document.createElement("div");
+
+    c.className="confetti";
+
+    c.innerHTML =
+      items[Math.floor(Math.random()*items.length)];
+
+    c.style.left =
+      Math.random()*100+"%";
+
+    c.style.animationDelay =
+      Math.random()*3+"s";
+
+    c.style.fontSize =
+      (15+Math.random()*20)+"px";
+
+    container.appendChild(c);
+
+    setTimeout(()=>{
+      c.remove();
+    },5000);
+  }
+}
+
+</script>
+
+</body>
+</html>
